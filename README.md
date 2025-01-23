@@ -1,21 +1,20 @@
-# template-composite-action
+# retrieve-oidc-token-action
 
-Template repository for Composite Action.
+Retrieve OIDC token's claims for GitHub.
 
 <!-- actdocs start -->
 
 ## Description
 
-Template repository for creating Composite Action with GitHub Actions.
+This action retrieves and decodes an OIDC token from the GitHub OpenID Connect Provider, exposing its JWT payload as JSON for workflows.
+It simplifies managing OIDC tokens in GitHub Actions and enables secure access to JWT claims.
 
 ## Usage
 
-Write usage for your Composite Action.
-
 ```yaml
   steps:
-    - name: Template
-      uses: tmknom/template-composite-action@v0
+    - name: Retrieve OIDC Token
+      uses: tmknom/retrieve-oidc-token-action@v0
 ```
 
 ## Inputs
@@ -24,13 +23,17 @@ N/A
 
 ## Outputs
 
-N/A
+| Name | Description |
+| :--- | :---------- |
+| payload | The JWT payload included OIDC token as plain JSON. |
 
 <!-- actdocs end -->
 
 ## Permissions
 
-N/A
+| Scope    | Access |
+| :------- | :----- |
+| id-token | write  |
 
 ## FAQ
 
@@ -44,4 +47,4 @@ N/A
 
 See [GitHub Releases][releases].
 
-[releases]: https://github.com/tmknom/template-composite-action/releases
+[releases]: https://github.com/tmknom/retrieve-oidc-token-action/releases

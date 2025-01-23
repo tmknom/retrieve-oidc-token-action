@@ -21,14 +21,10 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
+      id-token: write
     steps:
       - name: Checkout
         uses: tmknom/checkout-action@v1
-
-      - name: Setup
-        run: |
-          set -x
-          echo "Setup"
 
       - name: Exercise
         id: exercise
@@ -36,13 +32,7 @@ jobs:
 
       - name: Verify
         env:
-          OUTCOME: ${{ steps.exercise.outcome }}
+          PAYLOAD: ${{ steps.exercise.outputs.payload }}
         run: |
           set -x
-          test "${OUTCOME}" = "success"
-
-      - name: Teardown
-        if: ${{ always() }}
-        run: |
-          set -x
-          echo "Teardown"
+          test "$(jq -r '.run_id' <<<"${PAYLOAD}")" = "${GITHUB_RUN_ID}"
