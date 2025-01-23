@@ -111,6 +111,24 @@ runs:
   using: composite
 
   steps:
+    - name: Validate environment variables
+      run: |
+        echo "::group::Validate environment variables"
+        set -x
+        title="Error: Missing 'id-token' permission"
+        body="Please add 'permissions: id-token: write' to your workflow"
+        message="::error title=${title}::${body}"
+        if [[ "${ACTIONS_ID_TOKEN_REQUEST_URL}" == "" ]]; then
+          echo "${message}"
+          exit 1
+        fi
+        if [[ "${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" == "" ]]; then
+          echo "${message}"
+          exit 1
+        fi
+        echo "::endgroup::"
+      shell: bash
+
     - name: Request ID Token
       id: id-token
       run: |
