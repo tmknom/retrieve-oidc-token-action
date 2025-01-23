@@ -6,7 +6,8 @@ Retrieve OIDC token's claims for GitHub.
 
 ## Description
 
-This action retrieves and decodes an OIDC token from the GitHub OpenID Connect Provider, exposing its JWT payload as JSON for workflows.
+This action retrieves and decodes an OIDC token from the GitHub OpenID Connect Provider,
+exposing its JWT payload as JSON for workflows.
 It simplifies managing OIDC tokens in GitHub Actions and enables secure access to JWT claims.
 
 ## Usage
