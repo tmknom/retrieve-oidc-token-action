@@ -113,6 +113,8 @@ runs:
   steps:
     - name: Validate environment variables
       run: |
+        echo "::add-mask::${ACTIONS_ID_TOKEN_REQUEST_URL}"
+        echo "::add-mask::${ACTIONS_ID_TOKEN_REQUEST_TOKEN}"
         echo "::group::Validate environment variables"
         set -x
         title="Error: Missing 'id-token' permission"
