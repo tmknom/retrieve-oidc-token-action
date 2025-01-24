@@ -1,8 +1,8 @@
 name: Retrieve OIDC Token
 description: |
-  This action retrieves and decodes an OIDC token from the GitHub OpenID Connect Provider,
-  exposing its JWT payload as JSON for workflows.
-  It simplifies managing OIDC tokens in GitHub Actions and enables secure access to JWT claims.
+  This action retrieves an OIDC token from the GitHub OpenID Connect Provider,
+  decodes its payload, and extracts claims such as actor, repository, and workflow metadata.
+  The data is organized into structured outputs for easier integration with external systems or workflow debugging.
 
   ## Usage
 
@@ -16,6 +16,96 @@ outputs:
   payload:
     value: ${{ steps.payload.outputs.json }}
     description: The JWT payload included OIDC token as plain JSON.
+  actor:
+    value: ${{ steps.extract.outputs.actor }}
+    description: The `actor` claim is the name of the person or app that initiated the workflow.
+  actor_id:
+    value: ${{ steps.extract.outputs.actor_id }}
+    description: The `actor_id` claim is the account ID of the person or app that triggered the initial workflow run.
+  aud:
+    value: ${{ steps.extract.outputs.aud }}
+    description: The `aud` claim identifies the recipients that the JWT is intended for.
+  base_ref:
+    value: ${{ steps.extract.outputs.base_ref }}
+    description: The `base_ref` claim is the name of the base ref or target branch of the pull request in a workflow run.
+  event_name:
+    value: ${{ steps.extract.outputs.event_name }}
+    description: The `event_name` claim is the name of the event that triggered the workflow.
+  exp:
+    value: ${{ steps.extract.outputs.exp }}
+    description: The `exp` claim is the expiry time of the JWT.
+  head_ref:
+    value: ${{ steps.extract.outputs.head_ref }}
+    description: The `head_ref` claim is the head ref or source branch of the pull request in a workflow run.
+  iat:
+    value: ${{ steps.extract.outputs.iat }}
+    description: The `iat` claim is the time when the JWT was issued.
+  iss:
+    value: ${{ steps.extract.outputs.iss }}
+    description: The `iss` claim is the issuer of the OIDC token.
+  job_workflow_ref:
+    value: ${{ steps.extract.outputs.job_workflow_ref }}
+    description: The `job_workflow_ref` claim is the ref path to the reusable workflow.
+  job_workflow_sha:
+    value: ${{ steps.extract.outputs.job_workflow_sha }}
+    description: The `job_workflow_sha` claim is the commit SHA for the reusable workflow file.
+  jti:
+    value: ${{ steps.extract.outputs.jti }}
+    description: The `jti` claim is a unique identifier for the OIDC token.
+  nbf:
+    value: ${{ steps.extract.outputs.nbf }}
+    description: The `nbf` claim is the time before which the token cannot be used.
+  ref:
+    value: ${{ steps.extract.outputs.ref }}
+    description: The `ref` claim is the fully-formed ref of the branch or tag that triggered the workflow run.
+  ref_protected:
+    value: ${{ steps.extract.outputs.ref_protected }}
+    description: The `ref_protected` claim is `true` if branch protections or rulesets are configured for the ref that triggered the workflow run.
+  ref_type:
+    value: ${{ steps.extract.outputs.ref_type }}
+    description: The `ref_type` claim is the type of ref that triggered the workflow run.
+  repository:
+    value: ${{ steps.extract.outputs.repository }}
+    description: The `repository` claim is the owner and repository name.
+  repository_id:
+    value: ${{ steps.extract.outputs.repository_id }}
+    description: The `repository_id` claim is the ID of the repository.
+  repository_owner:
+    value: ${{ steps.extract.outputs.repository_owner }}
+    description: The `repository_owner` claim is the repository owner's name.
+  repository_owner_id:
+    value: ${{ steps.extract.outputs.repository_owner_id }}
+    description: The `repository_owner_id` claim is the  repository owner's account ID.
+  repository_visibility:
+    value: ${{ steps.extract.outputs.repository_visibility }}
+    description: The `repository_visibility` claim is the visibility of the repository where the workflow is running.
+  run_attempt:
+    value: ${{ steps.extract.outputs.run_attempt }}
+    description: The `run_attempt` claim is a unique number for each attempt of a particular workflow run in a repository.
+  run_id:
+    value: ${{ steps.extract.outputs.run_id }}
+    description: The `run_id` claim is a unique number for each workflow run within a repository.
+  run_number:
+    value: ${{ steps.extract.outputs.run_number }}
+    description: The `run_number` claim is a unique number for each run of a particular workflow in a repository.
+  runner_environment:
+    value: ${{ steps.extract.outputs.runner_environment }}
+    description: The `runner_environment` claim is the environment of the runner executing the job.
+  sha:
+    value: ${{ steps.extract.outputs.sha }}
+    description: The `sha` claim is the commit SHA that triggered the workflow.
+  sub:
+    value: ${{ steps.extract.outputs.sub }}
+    description: The `sub` claim identifies the principal that is the subject of the JWT.
+  workflow:
+    value: ${{ steps.extract.outputs.workflow }}
+    description: The `workflow` claim is the name of the workflow.
+  workflow_ref:
+    value: ${{ steps.extract.outputs.workflow_ref }}
+    description: The `workflow_ref` claim is the ref path to the workflow.
+  workflow_sha:
+    value: ${{ steps.extract.outputs.workflow_sha }}
+    description: The `workflow_sha` claim is the commit SHA for the workflow file.
 
 runs:
   using: composite
@@ -59,5 +149,47 @@ runs:
       run: |
         echo "::group::Show payload"
         jq . <<<"${PAYLOAD}"
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Extract
+      id: extract
+      env:
+        PAYLOAD: ${{ steps.payload.outputs.json }}
+      run: |
+        echo "::group::Extract"
+        set -x
+        {
+          echo "actor=$(jq -r '.actor' <<<"${PAYLOAD}")"
+          echo "actor_id=$(jq -r '.actor_id' <<<"${PAYLOAD}")"
+          echo "aud=$(jq -r '.aud' <<<"${PAYLOAD}")"
+          echo "base_ref=$(jq -r '.base_ref' <<<"${PAYLOAD}")"
+          echo "event_name=$(jq -r '.event_name' <<<"${PAYLOAD}")"
+          echo "exp=$(jq -r '.exp' <<<"${PAYLOAD}")"
+          echo "head_ref=$(jq -r '.head_ref' <<<"${PAYLOAD}")"
+          echo "iat=$(jq -r '.iat' <<<"${PAYLOAD}")"
+          echo "iss=$(jq -r '.iss' <<<"${PAYLOAD}")"
+          echo "job_workflow_ref=$(jq -r '.job_workflow_ref' <<<"${PAYLOAD}")"
+          echo "job_workflow_sha=$(jq -r '.job_workflow_sha' <<<"${PAYLOAD}")"
+          echo "jti=$(jq -r '.jti' <<<"${PAYLOAD}")"
+          echo "nbf=$(jq -r '.nbf' <<<"${PAYLOAD}")"
+          echo "ref=$(jq -r '.ref' <<<"${PAYLOAD}")"
+          echo "ref_protected=$(jq -r '.ref_protected' <<<"${PAYLOAD}")"
+          echo "ref_type=$(jq -r '.ref_type' <<<"${PAYLOAD}")"
+          echo "repository=$(jq -r '.repository' <<<"${PAYLOAD}")"
+          echo "repository_id=$(jq -r '.repository_id' <<<"${PAYLOAD}")"
+          echo "repository_owner=$(jq -r '.repository_owner' <<<"${PAYLOAD}")"
+          echo "repository_owner_id=$(jq -r '.repository_owner_id' <<<"${PAYLOAD}")"
+          echo "repository_visibility=$(jq -r '.repository_visibility' <<<"${PAYLOAD}")"
+          echo "run_attempt=$(jq -r '.run_attempt' <<<"${PAYLOAD}")"
+          echo "run_id=$(jq -r '.run_id' <<<"${PAYLOAD}")"
+          echo "run_number=$(jq -r '.run_number' <<<"${PAYLOAD}")"
+          echo "runner_environment=$(jq -r '.runner_environment' <<<"${PAYLOAD}")"
+          echo "sha=$(jq -r '.sha' <<<"${PAYLOAD}")"
+          echo "sub=$(jq -r '.sub' <<<"${PAYLOAD}")"
+          echo "workflow=$(jq -r '.workflow' <<<"${PAYLOAD}")"
+          echo "workflow_ref=$(jq -r '.workflow_ref' <<<"${PAYLOAD}")"
+          echo "workflow_sha=$(jq -r '.workflow_sha' <<<"${PAYLOAD}")"
+        } >> "${GITHUB_OUTPUT}"
         echo "::endgroup::"
       shell: bash

@@ -30,9 +30,83 @@ jobs:
         id: exercise
         uses: ./
 
-      - name: Verify
+      - name: Verify JWT payload
         env:
           PAYLOAD: ${{ steps.exercise.outputs.payload }}
         run: |
           set -x
           test "$(jq -r '.run_id' <<<"${PAYLOAD}")" = "${GITHUB_RUN_ID}"
+
+      - name: Verify JWT claims
+        env:
+          ACTOR: ${{ steps.exercise.outputs.actor }}
+          ACTOR_ID: ${{ steps.exercise.outputs.actor_id }}
+          AUD: ${{ steps.exercise.outputs.aud }}
+          BASE_REF: ${{ steps.exercise.outputs.base_ref }}
+          EVENT_NAME: ${{ steps.exercise.outputs.event_name }}
+          EXP: ${{ steps.exercise.outputs.exp }}
+          HEAD_REF: ${{ steps.exercise.outputs.head_ref }}
+          IAT: ${{ steps.exercise.outputs.iat }}
+          ISS: ${{ steps.exercise.outputs.iss }}
+          JOB_WORKFLOW_REF: ${{ steps.exercise.outputs.job_workflow_ref }}
+          JOB_WORKFLOW_SHA: ${{ steps.exercise.outputs.job_workflow_sha }}
+          JTI: ${{ steps.exercise.outputs.jti }}
+          NBF: ${{ steps.exercise.outputs.nbf }}
+          REF: ${{ steps.exercise.outputs.ref }}
+          REF_PROTECTED: ${{ steps.exercise.outputs.ref_protected }}
+          REF_TYPE: ${{ steps.exercise.outputs.ref_type }}
+          REPOSITORY: ${{ steps.exercise.outputs.repository }}
+          REPOSITORY_ID: ${{ steps.exercise.outputs.repository_id }}
+          REPOSITORY_OWNER: ${{ steps.exercise.outputs.repository_owner }}
+          REPOSITORY_OWNER_ID: ${{ steps.exercise.outputs.repository_owner_id }}
+          REPOSITORY_VISIBILITY: ${{ steps.exercise.outputs.repository_visibility }}
+          RUN_ATTEMPT: ${{ steps.exercise.outputs.run_attempt }}
+          RUN_ID: ${{ steps.exercise.outputs.run_id }}
+          RUN_NUMBER: ${{ steps.exercise.outputs.run_number }}
+          ACTUAL_RUNNER_ENVIRONMENT: ${{ steps.exercise.outputs.runner_environment }}
+          SHA: ${{ steps.exercise.outputs.sha }}
+          WORKFLOW: ${{ steps.exercise.outputs.workflow }}
+          WORKFLOW_REF: ${{ steps.exercise.outputs.workflow_ref }}
+          WORKFLOW_SHA: ${{ steps.exercise.outputs.workflow_sha }}
+        run: |
+          set -x
+          test "${ACTOR}" = "${GITHUB_ACTOR}"
+          test "${ACTOR_ID}" = "${GITHUB_ACTOR_ID}"
+          test "${AUD}" = "${GITHUB_SERVER_URL}/${REPOSITORY_OWNER}"
+          test "${BASE_REF}" = "${GITHUB_BASE_REF}"
+          test "${EVENT_NAME}" = "${GITHUB_EVENT_NAME}"
+          test "${EXP}" = "$((IAT + 300))"
+          test "${HEAD_REF}" = "${GITHUB_HEAD_REF}"
+          test "${IAT}" = "$((NBF + 600))"
+          test "${ISS}" = "https://token.actions.githubusercontent.com"
+          test "${JOB_WORKFLOW_REF}" = "${GITHUB_REPOSITORY}/.github/workflows/test.yml@${REF}"
+          test "${#JOB_WORKFLOW_SHA}" = "40" # length of SHA-1
+          test "${#JTI}" = "36" # length of UUID
+          test "${NBF}" = "$((EXP - 300 - 600))"
+          test "${REF}" = "${GITHUB_REF}"
+          test "${REF_PROTECTED}" = "${GITHUB_REF_PROTECTED}"
+          test "${REF_TYPE}" = "${GITHUB_REF_TYPE}"
+          test "${REPOSITORY}" = "${GITHUB_REPOSITORY}"
+          test "${REPOSITORY_ID}" = "${GITHUB_REPOSITORY_ID}"
+          test "${REPOSITORY_OWNER}" = "${GITHUB_REPOSITORY_OWNER}"
+          test "${REPOSITORY_OWNER_ID}" = "${GITHUB_REPOSITORY_OWNER_ID}"
+          test "${REPOSITORY_VISIBILITY}" = "public"
+          test "${RUN_ATTEMPT}" = "${GITHUB_RUN_ATTEMPT}"
+          test "${RUN_ID}" = "${GITHUB_RUN_ID}"
+          test "${RUN_NUMBER}" = "${GITHUB_RUN_NUMBER}"
+          test "${ACTUAL_RUNNER_ENVIRONMENT}" = "${RUNNER_ENVIRONMENT}"
+          test "${SHA}" = "${GITHUB_SHA}"
+          test "${WORKFLOW}" = "${GITHUB_WORKFLOW}"
+          test "${WORKFLOW_REF}" = "${GITHUB_WORKFLOW_REF}"
+          test "${WORKFLOW_SHA}" = "${GITHUB_WORKFLOW_SHA}"
+
+      - name: Verify sub claim
+        env:
+          SUB: ${{ steps.exercise.outputs.sub }}
+        run: |
+          set -x
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            test "${SUB}" = "repo:${GITHUB_REPOSITORY}:pull_request"
+          else
+            test "${SUB}" = "repo:${GITHUB_REPOSITORY}:ref:${GITHUB_REF}"
+          fi
