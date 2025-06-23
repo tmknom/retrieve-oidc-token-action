@@ -24,7 +24,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout
-        uses: tmknom/checkout-action@v1
+        uses: tmknom/secure-checkout-action@v1
 
       - name: Exercise
         id: exercise
@@ -75,14 +75,14 @@ jobs:
           test "${AUD}" = "${GITHUB_SERVER_URL}/${REPOSITORY_OWNER}"
           test "${BASE_REF}" = "${GITHUB_BASE_REF}"
           test "${EVENT_NAME}" = "${GITHUB_EVENT_NAME}"
-          test "${EXP}" = "$((IAT + 300))"
+          test "${EXP}" = "$((IAT + 21600))"
           test "${HEAD_REF}" = "${GITHUB_HEAD_REF}"
-          test "${IAT}" = "$((NBF + 600))"
+          test "${IAT}" = "$((NBF + 300))"
           test "${ISS}" = "https://token.actions.githubusercontent.com"
           test "${JOB_WORKFLOW_REF}" = "${GITHUB_REPOSITORY}/.github/workflows/test.yml@${REF}"
           test "${#JOB_WORKFLOW_SHA}" = "40" # length of SHA-1
           test "${#JTI}" = "36" # length of UUID
-          test "${NBF}" = "$((EXP - 300 - 600))"
+          test "${NBF}" = "$((EXP - 21600 - 300))"
           test "${REF}" = "${GITHUB_REF}"
           test "${REF_PROTECTED}" = "${GITHUB_REF_PROTECTED}"
           test "${REF_TYPE}" = "${GITHUB_REF_TYPE}"
@@ -119,7 +119,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: tmknom/checkout-action@v1
+        uses: tmknom/secure-checkout-action@v1
 
       - name: Exercise
         id: exercise
